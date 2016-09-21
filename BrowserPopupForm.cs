@@ -290,11 +290,7 @@ namespace Caesar
 
         }
 
-        private void OnFormClosing(object sender, FormClosingEventArgs e)
-        {
-            this.Browser.Dispose();
-            Program.Windows.Remove(this.windowId);
-        }
+        
 
         public void RunNotificationEmu()
         {
@@ -434,10 +430,31 @@ namespace Caesar
                 int c = GetTraderBookCount();
                 return "Trader's Book" + ((c > 0) ? " - " + c.ToString() : "");
             }
-            else if (path.EndsWith("/#positionSummariesWindow")) return "Pos.Summary";
-            else if (path.EndsWith("/secmaster-ui/")) return "Security Information";
-            else if (path.EndsWith("/admin-ui/")) return "Administration";
-            else return "Trader's Book";
+            else if (path.Contains("#"))
+            {
+                string itemName = path.Substring(path.IndexOf("#") + 1);
+                ToolStripItem[] items = this.contextMenuStrip1.Items.Find("navMenu_" + itemName, true);
+                if (items.Length > 0)
+                {
+                    return ((ToolStripMenuItem)items[0]).Text;
+                }
+                else
+                {
+                    return "Trader's Book";
+                }
+            }
+            else if (path.EndsWith("/secmaster-ui/"))
+            {
+                return "Security Information";
+            }
+            else if (path.EndsWith("/admin-ui/"))
+            {
+                return "Administration";
+            }
+            else
+            {
+                return "Trader's Book";
+            }
         }
 
         private void openNewToolStripMenuItem_Click(object sender, EventArgs e)
@@ -549,6 +566,12 @@ namespace Caesar
         private void statusBarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.Windows.Items["statusBar"].Browser.ShowDevTools();
+        }
+
+        private void BrowserPopupForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            this.Browser.Dispose();
+            Program.Windows.Remove(this.windowId);
         }
     }
 }
