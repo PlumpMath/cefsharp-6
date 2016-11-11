@@ -94,8 +94,11 @@ namespace Caesar
                     if (typeof Ext == 'object') {
                         var el = Ext.ComponentQuery.query('StatusBarCounters container');
                         if (el.length > 0) {
-                            var isExpanded = el[1].isVisible();
-                            window.bound.setStatusBarSize(isExpanded);
+                            var isCounters = el[1].isVisible(),
+                                alerts = Ext.ComponentQuery.query('alertDetails')[0],
+                                isAlerts = alerts.isVisible();
+
+                            window.bound.setStatusBarSize(isCounters, isAlerts);
                             //if (isExpanded) {
                             //    window.bound.setCurrentWindowSize(720, 117);
                             //} else {
@@ -107,7 +110,7 @@ namespace Caesar
 
             });
             if (window.location.href.endsWith('#statusBar')) {
-                window.bound.setStatusBarSize(false);   
+                window.bound.setStatusBarSize(false, false);   
             }
                     
             if (typeof Ext == 'object') {
@@ -548,13 +551,12 @@ namespace Caesar
             //task.Wait();
             //var zoomLevel = Math.Round(task.Result, 2) + 0.1;
 
-            string zoom = ((ToolStripMenuItem)sender).Tag.ToString();
+            Program.Layouts.ZoomLevel = Convert.ToDouble(((ToolStripMenuItem)sender).Tag);
 
             foreach(KeyValuePair<string, BrowserPopupForm> form in Program.Windows.Items)
             {
-                form.Value.Browser.SetZoomLevel(Convert.ToDouble(zoom));
+                form.Value.Browser.SetZoomLevel(Program.Layouts.ZoomLevel);
             }
-            
             //this.adjustWindowSizes(zoom);
         }
 

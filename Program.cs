@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using System.IO;
 using CefSharp;
@@ -15,9 +15,14 @@ namespace Caesar
 
     public class Program
     {
+        static Mutex mutex = new Mutex(true, "{8F6F0AC4-B9A1-45fd-A8CF-72F04E6BDE8F}");
         [STAThread]
         public static int Main(string[] args)
         {
+            if (!mutex.WaitOne(TimeSpan.Zero, true)) {
+                MessageBox.Show("Only one instance of Caesar application is allowed");
+                return 0;
+            }
 
             Program.UserDataDirectory = findUserDataPath();
             Program.Settings = UserSettings.Load();
@@ -33,7 +38,8 @@ namespace Caesar
             AppMode = Program.Settings.AppMode.Equals("dev") ? AppModes.Dev : AppModes.Prod;
 
             Run();
- 
+            mutex.ReleaseMutex();
+
             return 0;
         }
 

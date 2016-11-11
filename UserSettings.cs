@@ -16,8 +16,8 @@ namespace Caesar
         private string baseURL;
         public string BaseURL {
             get {
-                return "http://xashmun19qap.ash.pwj.com:8081/";
-                //return this.baseURL;
+                //return "http://xashmun19qap.ash.pwj.com:8081/";
+                return this.baseURL;
             }
             set { this.baseURL = value; }
         }
@@ -26,8 +26,8 @@ namespace Caesar
         public string CBW_URL {
             get
             {
-                return "http://xashmun16qap.ash.pwj.com:9090/merit-web/";
-                //return this.cbwURL;
+                //return "http://xashmun16qap.ash.pwj.com:9090/merit-web/";
+                return this.cbwURL;
             }
             set { this.cbwURL = value; }
             
