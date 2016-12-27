@@ -7,6 +7,7 @@ using CefSharp.WinForms;
 using System.Drawing;
 using System.Windows.Forms;
 using CefSharp;
+using Newtonsoft.Json.Linq;
 
 
 
@@ -16,13 +17,24 @@ namespace Caesar
     {
         public BrowserPopupForm form;
         
-        public static bool openWindow(string url)
+        public static bool openWindow(string url, string args = null)
         {
             string windowId = BrowserPopupForm.ParseWindowId(url);
             int maxTrbNum = Program.Settings.MaximumNumberOfTRBScreens;
             int trbCnt = BrowserPopupForm.GetTraderBookCount();
-            if (windowId.StartsWith("traderBook") && trbCnt >= maxTrbNum)
-            {
+            string title = null;
+            bool single = false;
+
+            if (!String.IsNullOrEmpty(args)) {
+                JObject options = JObject.Parse(args);
+                title = options["title"].ToString();
+                single = bool.Parse((options["single"] ?? "false").ToString());
+
+            }
+            
+
+            
+            if (windowId.StartsWith("traderBook") && trbCnt >= maxTrbNum) {
                 (new Thread(() => MessageBox.Show(
                         "Number of opened Trader Book's screens are limited by " + maxTrbNum.ToString(),
                         "Warning",
@@ -37,15 +49,17 @@ namespace Caesar
             string targetUrl = (url.StartsWith("http")) ? url : Program.Settings.BaseURL + url.Replace("../", "");
 
             browser.Invoke(new Action(() => {
-                if (Program.Windows.Items.ContainsKey(windowId))
-                {
-                    Program.Windows.Items[windowId].ShowNoActive();
-                }
-                else
-                {
-                    var windowTitle = Program.Windows.Items["landingPage"].resolveWindowTitle(url);
+                if (Program.Windows.Items.ContainsKey(windowId)) {
+                    if (single) {
+                        Program.Windows.Items[windowId].SetTopNoActive();
+                    } else {
+                        Program.Windows.Items[windowId].ShowNoActive();
+                    }
+                } else {
+                    var windowTitle = String.IsNullOrEmpty(title) ? Program.Windows.Items["landingPage"].resolveWindowTitle(url) : title;
                     var popup = new BrowserPopupForm(windowTitle, targetUrl, WindowTypes.TraderBook);
                     popup.Show();
+                    if (single) popup.SetTopNoActive();
                 }
             }));
             return true;
@@ -53,14 +67,14 @@ namespace Caesar
             
 
 
-        public bool OpenWindow(string url)
+        public bool OpenWindow(string url, string option = null)
         {
-            return openWindow(UrlRewrite(url));
+            return openWindow(UrlRewrite(url), option );
         }
 
-        public static void openCBW(string hash, string title)
+        public static void openCBW(string url, string title)
         {
-            string url = Program.Settings.CBW_URL + "#" + hash;
+            //string url = Program.Settings.CBW_URL + "#" + hash;
             string windowId = BrowserPopupForm.ParseWindowId(url);
             if (Program.Windows.Items.ContainsKey(windowId)) Program.Windows.Items[windowId].ShowNoActive();
             else

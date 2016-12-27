@@ -20,7 +20,7 @@ namespace Caesar
         public static int Main(string[] args)
         {
             if (!mutex.WaitOne(TimeSpan.Zero, true)) {
-                MessageBox.Show("Only one instance of Caesar application is allowed");
+                MessageBox.Show("Only one instance of Caesar application is allowed.");
                 return 0;
             }
 
@@ -98,6 +98,7 @@ namespace Caesar
                     Width = form.Bounds.Width,
                     Height = form.Bounds.Height,
                     targetUrl = form.targetUrl,
+                    title = form.Text,
                     inDesktop = (form.IsStatusBar || form.IsLandingPage) ? false : true,
                     WindowState = Convert.ToInt32(form.WindowState)
                 };

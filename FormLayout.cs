@@ -15,6 +15,7 @@ namespace Caesar
         public int Height { get; set; }
         public int Width { get; set; }
         public string targetUrl { get; set; }
+        public string title { get; set; }
         public int WindowState { get; set; }
         public bool inDesktop { get; set; }
         public double ZoomLevel { get; set; }

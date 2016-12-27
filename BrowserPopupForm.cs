@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using Newtonsoft.Json.Linq;
 
 using CefSharp;
 using CefSharp.WinForms;
@@ -38,8 +39,7 @@ namespace Caesar
         public Point dragCursorPoint;
         public Point dragFormPoint;
 
-        public void ShowNoActive()
-        {
+        public void ShowNoActive() {
             ShowWindow(this.Handle, 4);
         }
 
@@ -76,7 +76,11 @@ namespace Caesar
         private string CBW_LOAD_END_SCRIPT = "window.__TC = true;";
         private string TRB_LOAD_END_SCRIPT = @"
             window.open = function(){
-                bound.openWindow(arguments[0])
+                if(typeof arguments[1] == 'object') {
+                    bound.openWindow(arguments[0], Ext.encode(arguments[1]))
+                } else {
+                    bound.openWindow(arguments[0])
+                }
             }
             var els = document.getElementsByClassName('login');
             if (els.length > 0) {
@@ -118,9 +122,8 @@ namespace Caesar
                     $('body').css('padding', 0);
                     if (window.location.href.endsWith('web-sso/')) {
                         var items = [];
-
                         Ext.getStore('SettingMenuStore').each(function(item){
-                            items.push([item.get('text'), item.get('path'), item.get('disable')]);
+                            items.push([item.get('text'), item.get('path'), item.get('disable'), item.get('appName'), item.get('appUrl')]);
                         });
                         bound.fillContextMenu(items);
                     }
@@ -137,11 +140,29 @@ namespace Caesar
             int pos = url.IndexOf('#') + 1;
             string windowId = "traderBook";
 
-            if (pos > 0) windowId = url.Substring(pos);
-            else if (url.Contains("/admin-ui/")) windowId = "admin-ui";
-            else if (url.Contains("/secmaster-ui/")) windowId = "secmaster-ui";
-            else if (url.EndsWith("web-sso/"))   windowId = "landingPage";
+            if (pos > 0)
+            {
+                windowId = url.Substring(pos);
 
+                // if there are parameters passed after hash - windowId will be just a hash without paramenters
+                int pos2 = windowId.IndexOf('?');
+                if (pos2 > 0) windowId = windowId.Substring(0, pos2);
+
+                
+            }
+            else if (url.Contains("/admin-ui/"))
+            {
+                windowId = "admin-ui";
+            }
+            else if (url.Contains("/secmaster-ui/"))
+            {
+                windowId = "secmaster-ui";
+            }
+            else if (url.EndsWith("web-sso/"))
+            {
+                windowId = "landingPage";
+            }
+            
             if (windowId == "traderBook") windowId += "." + GetTraderBookCount();
 
             return windowId;
@@ -334,7 +355,11 @@ namespace Caesar
         {
             foreach (FormLayout layout in Program.Layouts.Items.Values)
             {
-                if (layout.inDesktop) BoundObject.openWindow(layout.targetUrl);
+                if (layout.inDesktop)
+                {
+                    JObject args = JObject.FromObject(layout);
+                    BoundObject.openWindow(layout.targetUrl, args.ToString());
+                }
             }
         }
 
@@ -377,17 +402,24 @@ namespace Caesar
                 ToolStripItem item = new ToolStripMenuItem(props[0].ToString());
                 
                 item.Tag = props[1].ToString();
-                item.Click += (sender, e) => onOpenWindowClick(props[1].ToString());
+                if (props[3].ToString() == "cbw")
+                {
+                    item.Click += (sender, e) => BoundObject.openCBW(props[4].ToString() + props[1].ToString(), props[0].ToString());
+                } else
+                {
+                    item.Click += (sender, e) => onOpenWindowClick(props[1].ToString());
+                }
+                
                 item.Enabled = !Convert.ToBoolean(props[2]);
                 item.Name = "navMenu_" + props[1].ToString().Replace("#", "");
 
                 this.contextMenuStrip1.Items.Insert(pos++, item);
             }
 
-            ToolStripMenuItem sbItemCBW = new ToolStripMenuItem("Merit CBW");
-            sbItemCBW.Name = "navMenu_CBW";
-            fillMeritItems(sbItemCBW);
-            this.contextMenuStrip1.Items.Insert(0, sbItemCBW);
+            //ToolStripMenuItem sbItemCBW = new ToolStripMenuItem("Merit CBW");
+            //sbItemCBW.Name = "navMenu_CBW";
+            //fillMeritItems(sbItemCBW);
+            //this.contextMenuStrip1.Items.Insert(0, sbItemCBW);
 
 
             // adding a Status Bar option
@@ -428,34 +460,22 @@ namespace Caesar
 
         public string resolveWindowTitle(string path)
         {
-            if (path.EndsWith("/tradersbook-ui/"))
-            {
+            if (path.EndsWith("/tradersbook-ui/")) {
                 int c = GetTraderBookCount();
                 return "Trader's Book" + ((c > 0) ? " - " + c.ToString() : "");
-            }
-            else if (path.Contains("#"))
-            {
+            } else if (path.Contains("#")) {
                 string itemName = path.Substring(path.IndexOf("#") + 1);
                 ToolStripItem[] items = this.contextMenuStrip1.Items.Find("navMenu_" + itemName, true);
-                if (items.Length > 0)
-                {
+                if (items.Length > 0) {
                     return ((ToolStripMenuItem)items[0]).Text;
-                }
-                else
-                {
+                } else {
                     return "Trader's Book";
                 }
-            }
-            else if (path.EndsWith("/secmaster-ui/"))
-            {
+            } else if (path.EndsWith("/secmaster-ui/")) {
                 return "Security Information";
-            }
-            else if (path.EndsWith("/admin-ui/"))
-            {
+            } else if (path.EndsWith("/admin-ui/")) {
                 return "Administration";
-            }
-            else
-            {
+            } else {
                 return "Trader's Book";
             }
         }
