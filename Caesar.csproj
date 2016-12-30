@@ -88,6 +88,7 @@
     <Compile Include="FormLayout.cs" />
     <Compile Include="Handlers\DownloadHandler.cs" />
     <Compile Include="Handlers\LifeSpanHandler.cs" />
+    <Compile Include="IdleMonitor.cs" />
     <Compile Include="Proxy\InternetOpenType.cs" />
     <Compile Include="Proxy\InternetProxyInfo.cs" />
     <Compile Include="Proxy\ProxyConfig.cs" />

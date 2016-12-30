@@ -274,5 +274,12 @@ namespace Caesar
 
         }
 
+        public void startIdleMonitor(double idleTimeoutSeconds, int timerIntervalSeconds)
+        {
+            form.Invoke(new Action(() => {
+                IdleMonitor.Start(idleTimeoutSeconds, timerIntervalSeconds);
+            }));
+        }
+
     }
 }
