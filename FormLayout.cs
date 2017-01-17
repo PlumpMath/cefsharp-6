@@ -19,6 +19,7 @@ namespace Caesar
         public int WindowState { get; set; }
         public bool inDesktop { get; set; }
         public double ZoomLevel { get; set; }
+        public string selectedWS { get; set; }
 
     }
 
@@ -94,17 +95,18 @@ namespace Caesar
         {
             FormLayout layout;
             //if (this.Items.ContainsKey(windowId) && (this.Items[windowId].WindowState == 2 || (this.Items[windowId].X >= 0 && this.Items[windowId].Y >= 0)))
-            if (this.Items.ContainsKey(windowId))
-            {
+            if (this.Items.ContainsKey(windowId)) {
                 layout = this.Items[windowId];
-                if (layout.X < 0 || layout.Y < 0 || layout.WindowState != 0) {
-                    layout.X = 50;
-                    layout.Y = 50;
+                if (windowId == "landingPage") {
+                    layout.X = 150;
+                    layout.Y = 150;
+                    layout.Height = 27;
+                    layout.Width = 160;
                     layout.WindowState = 0;
                 }
-            }
-            else
-            {
+                //if (layout.X < 0 || layout.Y < 0 || layout.WindowState != 0) layout.X = 50;  layout.Y = 50; layout.WindowState = 0;
+
+            } else {
                 layout = GetDefaultLayout(windowId);
             }
             return layout;
