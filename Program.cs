@@ -100,7 +100,8 @@ namespace Caesar
                     targetUrl = form.targetUrl,
                     title = form.Text,
                     inDesktop = (form.IsStatusBar || form.IsLandingPage) ? false : true,
-                    WindowState = Convert.ToInt32(form.WindowState)
+                    WindowState = Convert.ToInt32(form.WindowState),
+                    selectedWS = form.getSelectedWorkspaceId()
                 };
             }
         }

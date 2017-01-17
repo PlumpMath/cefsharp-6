@@ -281,5 +281,12 @@ namespace Caesar
             }));
         }
 
+        public string getStoredWS()
+        {
+            FormLayout layout = Program.Layouts.GetLayout(this.form?.WindowId);
+            return layout.selectedWS;
+        }
+
+
     }
 }

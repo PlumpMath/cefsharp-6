@@ -69,10 +69,15 @@ namespace Caesar
         private string CBW_LOAD_START_SCRIPT = @"
             window.open = function(){
                 bound.openCBW(arguments[0]);
-            };";
+            };
+        ";
         private string TRB_LOAD_START_SCRIPT = @"
             if (window.location.href.includes('/login.jsp')) bound.onLogout();
-            if (window.location.href.endsWith('/web-sso/')) bound.onLogin();";
+            if (window.location.href.endsWith('/web-sso/')) bound.onLogin();
+            bound.getStoredWS().then(function(wsid){
+                bound.storedWS = wsid;
+            });
+        ";
         private string CBW_LOAD_END_SCRIPT = "window.__TC = true;";
         private string TRB_LOAD_END_SCRIPT = @"
             window.open = function(){
@@ -530,6 +535,18 @@ namespace Caesar
                 foreach (object item in list) dims.Add(Convert.ToInt16(item));
             }
             return dims;
+        }
+
+        public string getSelectedWorkspaceId()
+        {
+            string wsid = null;
+            var task = this.Browser.GetMainFrame().EvaluateScriptAsync("frameworkCtrl.getSelectedWorkspaceId();");
+            task.Wait();
+            if (task.Result.Success)
+            {
+                wsid = task.Result.Result as string;
+            }
+            return wsid;
         }
 
         private void doZoom(BrowserPopupForm form, List<int> dims, string zoom)
