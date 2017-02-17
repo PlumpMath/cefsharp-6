@@ -155,19 +155,14 @@ namespace Caesar
 
                 
             }
-            else if (url.Contains("/admin-ui/"))
-            {
-                windowId = "admin-ui";
+            else if (url.Contains("/admin-ui/")) {
+                if (url.Contains("/admin-ui/?tab=TradersBook")) windowId = "admin-ui-preferences";
+                else windowId = "admin-ui";
+              
             }
-            else if (url.Contains("/secmaster-ui/"))
-            {
-                windowId = "secmaster-ui";
-            }
-            else if (url.EndsWith("web-sso/"))
-            {
-                windowId = "landingPage";
-            }
-            
+            else if (url.Contains("/secmaster-ui/")) windowId = "secmaster-ui";
+            else if (url.EndsWith("web-sso/")) windowId = "landingPage";
+
             if (windowId == "traderBook") windowId += "." + GetTraderBookCount();
 
             return windowId;
@@ -478,8 +473,9 @@ namespace Caesar
                 }
             } else if (path.EndsWith("/secmaster-ui/")) {
                 return "Security Information";
-            } else if (path.EndsWith("/admin-ui/")) {
-                return "Administration";
+            } else if (path.Contains("/admin-ui/")) {
+                if (path.Contains("/admin-ui/?tab=TradersBook")) return "Preferences";
+                else return "Administration";
             } else {
                 return "Trader's Book";
             }
