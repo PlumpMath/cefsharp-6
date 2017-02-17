@@ -88,7 +88,8 @@ namespace Caesar
 
             Program.Layouts.ZoomLevel = zoomLevel;
 
-            foreach (FormLayout layout in Program.Layouts.Items.Values) layout.inDesktop = false;
+            //foreach (FormLayout layout in Program.Layouts.Items.Values) layout.inDesktop = false;
+            Program.Layouts.Items.Clear();
             foreach (BrowserPopupForm form in Windows.Items.Values)
             {
                 Program.Layouts.Items[form.WindowId] = new FormLayout

@@ -265,13 +265,27 @@ namespace Caesar
 
         public void onLogout()
         {
-            form.Invoke(new Action(() => {
+            BrowserPopupForm f = Program.Windows.Items["landingPage"];
+            f.Invoke(new Action(() => {
                 Program.CloseAllButLandingPage();
-                form.clearContextMenu();
-                form.SetTopNoActive();
+                f.clearContextMenu();
+                f.SetTopNoActive();
                 CefSharp.Cef.GetGlobalCookieManager().DeleteCookiesAsync("", "").Wait();
             }));
+        }
 
+        public void closeAndLogout() {
+            BrowserPopupForm f = Program.Windows.Items["landingPage"];
+            Task.Run(async () => {
+                await Task.Delay(100);
+                f.Invoke(new Action(() => {
+                    Program.CloseAllButLandingPage();
+                    CefSharp.Cef.GetGlobalCookieManager().DeleteCookiesAsync("", "").Wait();
+                    f.Browser.GetBrowser().MainFrame.ExecuteJavaScriptAsync("window.location.reload();");
+                    f.clearContextMenu();
+                    f.SetTopNoActive();
+                }));
+            });
         }
 
         public void startIdleMonitor(double idleTimeoutSeconds, int timerIntervalSeconds)
