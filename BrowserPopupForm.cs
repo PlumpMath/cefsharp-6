@@ -575,22 +575,26 @@ namespace Caesar
             
         }
 
-
-
-        private void regularToolStripMenuItem_Click(object sender, EventArgs e)
+        private void changeZoom(double zoomLevel)
         {
             var browser = Program.Windows.Items["statusBar"].Browser;
             //var task = browser.GetZoomLevelAsync();
             //task.Wait();
             //var zoomLevel = Math.Round(task.Result, 2) + 0.1;
 
-            Program.Layouts.ZoomLevel = Convert.ToDouble(((ToolStripMenuItem)sender).Tag);
+            Program.Layouts.ZoomLevel = zoomLevel;
 
             foreach(KeyValuePair<string, BrowserPopupForm> form in Program.Windows.Items)
             {
                 form.Value.Browser.SetZoomLevel(Program.Layouts.ZoomLevel);
+                form.Value.Browser.GetMainFrame().EvaluateScriptAsync("document.dispatchEvent(new Event('zoom'))");
             }
             //this.adjustWindowSizes(zoom);
+        }
+
+        private void regularToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            changeZoom(Convert.ToDouble(((ToolStripMenuItem)sender).Tag));
         }
 
         private void landingPageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -607,6 +611,17 @@ namespace Caesar
         {
             this.Browser.Dispose();
             Program.Windows.Remove(this.windowId);
+        }
+
+ 
+
+        private void toolStripTextBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+            {
+                changeZoom(Convert.ToDouble(((ToolStripTextBox)sender).Text));
+            }
+   
         }
     }
 }

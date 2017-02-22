@@ -190,10 +190,12 @@ namespace Caesar
                 var zoom = Math.Round(task.Result, 2);
                 int[] dims;
 
-                if      (zoom == 0) dims = new int[]    { 701, alerts ? 672 : (expanded ? 96 : 72) };
+                if      (zoom == -0.78) dims = new int[] { 607, alerts ? 612 : (expanded ? 77 : 58) };
+                else if (zoom == 0) dims = new int[]    { 701, alerts ? 672 : (expanded ? 96 : 72) };
                 else if (zoom == 0.25) dims = new int[] { 734, alerts ? 692 : (expanded ? 100 : 75) };
                 else if (zoom == 0.50) dims = new int[] { 768, alerts ? 705 : (expanded ? 104 : 78) };
                 else if (zoom == 0.80) dims = new int[] { 811, alerts ? 722 : (expanded ? 112 : 84) };
+                else if (zoom == 1.26) dims = new int[] { 882, alerts ? 740 : (expanded ? 116 : 86) };
                 else if (zoom == 1.8) dims = new int[]  { 973, alerts ? 772 : (expanded ? 132 : 99) };
                 else dims = new int[] { 701, 71 };
 
