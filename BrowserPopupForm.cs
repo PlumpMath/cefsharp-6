@@ -66,6 +66,7 @@ namespace Caesar
         private bool CloseContextMenu = true;
         private string windowId;
         public string targetUrl;
+        public FormLayout layout;
         private string CBW_LOAD_START_SCRIPT = @"
             window.open = function(){
                 bound.openCBW(arguments[0]);
@@ -148,11 +149,11 @@ namespace Caesar
             if (pos > 0)
             {
                 windowId = url.Substring(pos);
-
-                // if there are parameters passed after hash - windowId will be just a hash without paramenters
-                int pos2 = windowId.IndexOf('?');
-                if (pos2 > 0) windowId = windowId.Substring(0, pos2);
-
+                if (!windowId.StartsWith("orderAction")) {
+                    // if there are parameters passed after hash - windowId will be just a hash without paramenters
+                    int pos2 = windowId.IndexOf('?');
+                    if (pos2 > 0) windowId = windowId.Substring(0, pos2);
+                }
                 
             }
             else if (url.Contains("/admin-ui/")) {
@@ -179,7 +180,7 @@ namespace Caesar
         public bool IsStatusBar { get { return (this.WindowType == WindowTypes.StatusBar); } }
 
 
-        public BrowserPopupForm(string targetFrameName, string targetUrl, WindowTypes windowType)
+        public BrowserPopupForm(string targetFrameName, string targetUrl, WindowTypes windowType, FormLayout layout = null)
         {
 
             string ON_LOAD_END = windowType == WindowTypes.CBW ? CBW_LOAD_END_SCRIPT: TRB_LOAD_END_SCRIPT;
@@ -187,7 +188,7 @@ namespace Caesar
 
            
 
-            this.Init(targetFrameName, targetUrl, windowType);
+            this.Init(targetFrameName, new ChromiumWebBrowser(targetUrl), windowType, layout);
             
             this.Browser.RegisterAsyncJsObject("bound", new BoundObject() { form = this });
 
@@ -205,16 +206,18 @@ namespace Caesar
 
 
 
-        public BrowserPopupForm(string targetFrameName, ChromiumWebBrowser browser, WindowTypes windowType = WindowTypes.TraderBook)
+        public BrowserPopupForm(string targetFrameName, ChromiumWebBrowser browser, WindowTypes windowType = WindowTypes.TraderBook, FormLayout layout = null)
         {
-            this.Init(targetFrameName, browser, windowType);
+            this.Init(targetFrameName, browser, windowType, layout);
         }
 
         
-        private void Init(string targetFrameName, ChromiumWebBrowser browser, WindowTypes windowType)
+        private void Init(string targetFrameName, ChromiumWebBrowser browser, WindowTypes windowType, FormLayout layout)
         {
             InitializeComponent();
 
+
+            this.layout = layout;
             this.Browser = browser;
 
             this.Browser.LoadError += ((e, o) => {
@@ -235,12 +238,13 @@ namespace Caesar
             this.notifyIcon1.Visible = this.IsLandingPage;
             this.contextMenuStrip1.Items.Find("devToolStripMenuItem", true)[0].Visible = (Program.AppMode == AppModes.Dev);
 
-            FormLayout layout = Program.Layouts.GetLayout(this.WindowId);
+            //FormLayout layout = Program.Layouts.GetLayout(this.WindowId);
+            if (layout == null) layout = Layouts.GetDefaultLayout(this.WindowId);
 
             if (!this.IsLandingPage)  {
                 browser.FrameLoadEnd += (obj, e) => {
                     IWebBrowser IW = (IWebBrowser)obj;
-                    IW.SetZoomLevel(Program.Layouts.ZoomLevel);
+                    IW.SetZoomLevel(Program.ZoomLevel);
                 };
                 
             }
@@ -266,10 +270,6 @@ namespace Caesar
             this.Controls.Add(browser);
         }
 
-        private void Init(string targetFrameName, string targetUrl, WindowTypes windowType)
-        {
-            this.Init(targetFrameName, new ChromiumWebBrowser(targetUrl), windowType);
-        }
 
         private void updateDevtoolItems()
         {
@@ -353,14 +353,23 @@ namespace Caesar
 
         private void launchDesktopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (FormLayout layout in Program.Layouts.Items.Values)
-            {
-                if (layout.inDesktop)
-                {
+            if (Program.CloseAllPopups(true)) launchDesktop();
+        }
+
+        private void launchDesktop()
+        {
+            Program.ZoomLevel = Program.Layouts.ZoomLevel;
+            setCheckedZoomLevelItem(Program.ZoomLevel);
+            foreach (FormLayout layout in Program.Layouts.Items.Values) {
+                if (layout.inDesktop) {
                     JObject args = JObject.FromObject(layout);
-                    BoundObject.openWindow(layout.targetUrl, args.ToString());
-                }
+                    BoundObject.openWindow(layout);
+                } 
             }
+            BrowserPopupForm sb = Program.Windows.Items["statusBar"];
+            FormLayout sbLayout = Program.Layouts.Items["statusBar"];
+            if (sb != null) sb.SetBounds(sbLayout.X, sbLayout.Y, sbLayout.Width, sbLayout.Height);
+
         }
 
         private void onOpenWindowClick(string path)
@@ -485,7 +494,7 @@ namespace Caesar
         {
             //string targetUrl = Microsoft.VisualBasic.Interaction.InputBox("Title", "Prompt", "Default", 0, 0);
             string targetUrl = "http://localhost:8080";
-            var popup = new BrowserPopupForm("dev window", targetUrl, WindowTypes.TraderBook);
+            var popup = new BrowserPopupForm("dev window", targetUrl, WindowTypes.TraderBook, null);
             popup.Show();
         }
 
@@ -582,19 +591,30 @@ namespace Caesar
             //task.Wait();
             //var zoomLevel = Math.Round(task.Result, 2) + 0.1;
 
-            Program.Layouts.ZoomLevel = zoomLevel;
+            Program.ZoomLevel = zoomLevel;
 
             foreach(KeyValuePair<string, BrowserPopupForm> form in Program.Windows.Items)
             {
-                form.Value.Browser.SetZoomLevel(Program.Layouts.ZoomLevel);
+                form.Value.Browser.SetZoomLevel(zoomLevel);
                 form.Value.Browser.GetMainFrame().EvaluateScriptAsync("document.dispatchEvent(new Event('zoom'))");
             }
+            setCheckedZoomLevelItem(zoomLevel);
             //this.adjustWindowSizes(zoom);
         }
 
         private void regularToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            changeZoom(Convert.ToDouble(((ToolStripMenuItem)sender).Tag));
+            ToolStripMenuItem currentItem = (ToolStripMenuItem)sender;
+            double zoomLevel = Convert.ToDouble(currentItem.Tag);
+            changeZoom(zoomLevel);
+        }
+
+        private void setCheckedZoomLevelItem(double zoomLevel)
+        {
+            ToolStripMenuItem[] items = { regularToolStripMenuItem1, xXLargeToolStripMenuItem1 , xLargeToolStripMenuItem1 }; 
+            foreach (ToolStripMenuItem item in items) {
+                item.Checked = (item.Tag.ToString()  == zoomLevel.ToString());
+            }
         }
 
         private void landingPageToolStripMenuItem_Click(object sender, EventArgs e)

@@ -20,6 +20,7 @@ namespace Caesar
         public bool inDesktop { get; set; }
         public double ZoomLevel { get; set; }
         public string selectedWS { get; set; }
+        public WindowTypes WindowType { get; set; }
 
     }
 
@@ -66,7 +67,8 @@ namespace Caesar
                 X = 20,
                 Y = 20,
                 Width = 800,
-                Height = 600
+                Height = 600,
+                WindowType = WindowTypes.TraderBook 
             };
             if (windowId == "#statusBar")
             {
@@ -75,7 +77,8 @@ namespace Caesar
                     X = 20,
                     Y = 20,
                     Width = 551,
-                    Height = 115
+                    Height = 115,
+                    WindowType = WindowTypes.StatusBar
                 };
             }
             else if (windowId == "landingPage")
@@ -85,7 +88,8 @@ namespace Caesar
                     X = 200,
                     Y = 200,
                     Width = 415,
-                    Height = 265
+                    Height = 265,
+                    WindowType = WindowTypes.LandingPage
                 };
             }
             return defaultLayout;

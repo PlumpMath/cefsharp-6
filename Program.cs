@@ -51,6 +51,8 @@ namespace Caesar
 
         public static Layouts Layouts;
 
+        public static double ZoomLevel = 0;
+
         public static ChildWindows Windows = new ChildWindows() { Items = new Dictionary<String, BrowserPopupForm>() };
 
 
@@ -92,7 +94,8 @@ namespace Caesar
             Program.Layouts.Items.Clear();
             foreach (BrowserPopupForm form in Windows.Items.Values)
             {
-                Program.Layouts.Items[form.WindowId] = new FormLayout
+                //Program.Layouts.Items[form.WindowId] = new FormLayout
+                FormLayout layout = new FormLayout
                 {
                     X = form.Bounds.X,
                     Y = form.Bounds.Y,
@@ -102,8 +105,11 @@ namespace Caesar
                     title = form.Text,
                     inDesktop = (form.IsStatusBar || form.IsLandingPage) ? false : true,
                     WindowState = Convert.ToInt32(form.WindowState),
-                    selectedWS = form.getSelectedWorkspaceId()
+                    selectedWS = form.getSelectedWorkspaceId(),
+                    WindowType = form.WindowType 
                 };
+                string itemId = form.IsStatusBar ? "statusBar" : Program.Layouts.Items.Count.ToString();
+                Program.Layouts.Items[itemId] = form.layout = layout;
             }
         }
 
@@ -116,14 +122,27 @@ namespace Caesar
 
         }
 
-        public static void CloseAllPopups()
+        public static bool CloseAllPopups(bool showConfirmation = false)
         {
+            bool result = true;
             List<Form> forms = new List<Form>();
-            foreach (KeyValuePair<string, BrowserPopupForm> form in Windows.Items.Where(p => !p.Value.IsLandingPage && !p.Value.IsStatusBar).ToArray())
-            {
+            foreach (KeyValuePair<string, BrowserPopupForm> form in Windows.Items.Where(p => !p.Value.IsLandingPage && !p.Value.IsStatusBar).ToArray()) {
                 forms.Add(form.Value);
             }
-            CloseWindows(forms);
+            if (forms.Count > 0 && showConfirmation) {
+                DialogResult response = MessageBox.Show(
+                    forms[0], 
+                    "Currently opened windows will be closed. Do you want to proceed?", 
+                    "You have opened windows", 
+                    MessageBoxButtons.YesNo, 
+                    MessageBoxIcon.Question
+                );
+                result = (response == DialogResult.Yes);
+                if (response == DialogResult.Yes) CloseWindows(forms);
+            } else {
+                CloseWindows(forms);
+            }
+            return result;
         }
 
         public static void CloseAllButLandingPage()

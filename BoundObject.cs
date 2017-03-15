@@ -16,7 +16,14 @@ namespace Caesar
     public class BoundObject
     {
         public BrowserPopupForm form;
-        
+
+        public static bool openWindow(FormLayout layout)
+        {
+            var popup = new BrowserPopupForm(layout.title, layout.targetUrl, layout.WindowType, layout);
+            popup.Show();
+            return true;
+        }
+
         public static bool openWindow(string url, string args = null)
         {
             string windowId = BrowserPopupForm.ParseWindowId(url);
@@ -57,7 +64,7 @@ namespace Caesar
                     }
                 } else {
                     var windowTitle = String.IsNullOrEmpty(title) ? Program.Windows.Items["landingPage"].resolveWindowTitle(url) : title;
-                    var popup = new BrowserPopupForm(windowTitle, targetUrl, WindowTypes.TraderBook);
+                    var popup = new BrowserPopupForm(windowTitle, targetUrl, WindowTypes.TraderBook, null);
                     popup.Show();
                     if (single) popup.SetTopNoActive();
                 }
@@ -164,16 +171,15 @@ namespace Caesar
 
                 var task = form.Browser.GetZoomLevelAsync();
                 task.Wait();
-
-                
                 var zoom = Math.Round(task.Result, 2);
-                double k = zoom < 2 ? 5.5 : 4.7;
 
-                //form.Width = Convert.ToInt16(width * (1 + zoom/5.5));
-                //form.Height = Convert.ToInt16((height + 2) * (1 + zoom/5.5));
+                double k = 1;
+                if (zoom == -0.78) k = 0.89;
+                else if (zoom == 1.26) k = 1.24;
+                
 
-                form.Width = Convert.ToInt16(width * (1 + zoom/k));
-                form.Height = Convert.ToInt16((height + 2) * (1 + zoom/k));
+                form.Width = Convert.ToInt16((width + 5) * k);
+                form.Height = Convert.ToInt16((height + 2) * k);
 
                 //form.Width = Convert.ToInt16(width + 15);
                 //form.Height = Convert.ToInt16((height + 17));
@@ -299,8 +305,7 @@ namespace Caesar
 
         public string getStoredWS()
         {
-            FormLayout layout = Program.Layouts.GetLayout(this.form?.WindowId);
-            return layout.selectedWS;
+            return this.form?.layout?.selectedWS;
         }
 
 

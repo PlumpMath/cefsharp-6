@@ -68,17 +68,17 @@
             this.wndMenu_Root,
             this.bbToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 98);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(136, 76);
             // 
             // contextMenuSeparator
             // 
             this.contextMenuSeparator.Name = "contextMenuSeparator";
-            this.contextMenuSeparator.Size = new System.Drawing.Size(149, 6);
+            this.contextMenuSeparator.Size = new System.Drawing.Size(132, 6);
             // 
             // downloadsToolStripMenuItem
             // 
             this.downloadsToolStripMenuItem.Name = "downloadsToolStripMenuItem";
-            this.downloadsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.downloadsToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.downloadsToolStripMenuItem.Text = "Downloads";
             this.downloadsToolStripMenuItem.Click += new System.EventHandler(this.downloadsToolStripMenuItem_Click);
             // 
@@ -91,7 +91,7 @@
             this.launchDesktopToolStripMenuItem1,
             this.closeAllToolStripMenuItem1});
             this.wndMenu_Root.Name = "wndMenu_Root";
-            this.wndMenu_Root.Size = new System.Drawing.Size(152, 22);
+            this.wndMenu_Root.Size = new System.Drawing.Size(135, 22);
             this.wndMenu_Root.Text = "Window";
             // 
             // zoomToolStripMenuItem1
@@ -115,6 +115,9 @@
             // 
             // xLargeToolStripMenuItem1
             // 
+            this.xLargeToolStripMenuItem1.Checked = true;
+            this.xLargeToolStripMenuItem1.CheckOnClick = true;
+            this.xLargeToolStripMenuItem1.CheckState = System.Windows.Forms.CheckState.Checked;
             this.xLargeToolStripMenuItem1.Name = "xLargeToolStripMenuItem1";
             this.xLargeToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
             this.xLargeToolStripMenuItem1.Tag = "0";
@@ -163,7 +166,7 @@
             this.devToolStripMenuItem,
             this.appMenu_exitApp});
             this.bbToolStripMenuItem.Name = "bbToolStripMenuItem";
-            this.bbToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.bbToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.bbToolStripMenuItem.Text = "Application";
             this.bbToolStripMenuItem.Click += new System.EventHandler(this.OnCloseAll);
             // 
